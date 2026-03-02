@@ -7,7 +7,7 @@ A multi-tool Streamlit app for romance and genre fiction authors. Four paid tool
 - 📱 FB & Instagram Ad Package — $25
 - 🎨 Cover Assessment — $15
 - 🛒 Amazon Page Assessment — $19
-- 🏆 Lifetime Access — all four tools — $97
+
 
 ---
 
@@ -89,9 +89,7 @@ STRIPE_AMAZON_LINK    = "https://buy.stripe.com/fZudR836FaKy17Q4LO48006"
 AMAZON_PRICE_DISPLAY  = "$19"
 AMAZON_PRICE_SUBTITLE = "per report · full page review"
 
-# STRIPE_LIFETIME_LINK  = "https://buy.stripe.com/ADD-WHEN-CREATED"
-LIFETIME_PRICE_DISPLAY  = "$97"
-LIFETIME_PRICE_SUBTITLE = "one-time · all four tools · forever"
+
 
 COUPON_CODES = "WRITINGWIVES, SKOOLMEMBER"
 ```
