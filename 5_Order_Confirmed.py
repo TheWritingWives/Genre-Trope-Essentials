@@ -9,12 +9,7 @@ except ImportError:
     STRIPE_AVAILABLE = False
 
 # ── Page config ───────────────────────────────────────────────────────────────
-st.set_page_config(
-    page_title="Order Confirmed | The Writing Wives",
-    page_icon="✅",
-    layout="centered",
-    initial_sidebar_bar="collapsed",
-)
+
 
 # ── Brand colours ─────────────────────────────────────────────────────────────
 PRIMARY   = "#1A1A1A"
@@ -33,7 +28,7 @@ def get_secret(key, default=""):
         return default
 
 def get_logo_b64():
-    p = Path(__file__).parent.parent / "logo.png"
+    p = Path(__file__).parent / "logo.png"
     if p.exists():
         with open(p, "rb") as f:
             return base64.b64encode(f.read()).decode()
@@ -85,7 +80,7 @@ TOOL_META = {
         "name":    "Blurb Auditor",
         "icon":    "📖",
         "tagline": "Your scored audit is ready. Paste your blurb and get your report.",
-        "page":    "pages/1_Blurb_Auditor.py",
+        "page":    "1_Blurb_Auditor.py",
         "cta":     "Go to Blurb Auditor →",
         "price":   get_secret("PRICE_DISPLAY", "$27"),
     },
@@ -93,7 +88,7 @@ TOOL_META = {
         "name":    "FB & Instagram Ad Package",
         "icon":    "📱",
         "tagline": "Your ad copy is one click away. Fill in your book details and generate.",
-        "page":    "pages/2_FB_Ad_Package.py",
+        "page":    "2_FB_Ad_Package.py",
         "cta":     "Go to Ad Package →",
         "price":   get_secret("AD_PRICE_DISPLAY", "$25"),
     },
@@ -101,7 +96,7 @@ TOOL_META = {
         "name":    "Cover Assessment",
         "icon":    "🎨",
         "tagline": "Upload your cover and get your full genre signal report.",
-        "page":    "pages/3_Cover_Assessment.py",
+        "page":    "3_Cover_Assessment.py",
         "cta":     "Go to Cover Assessment →",
         "price":   get_secret("COVER_PRICE_DISPLAY", "$15"),
     },
@@ -109,7 +104,7 @@ TOOL_META = {
         "name":    "Amazon Page Assessment",
         "icon":    "🛒",
         "tagline": "Paste your Amazon link and get your full page score.",
-        "page":    "pages/4_Amazon_Assessment.py",
+        "page":    "4_Amazon_Assessment.py",
         "cta":     "Go to Amazon Assessment →",
         "price":   get_secret("AMAZON_PRICE_DISPLAY", "$19"),
     },
@@ -234,7 +229,8 @@ if not tool or not session_id:
       If you've already paid, head back to your tool using the link below.</p>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("app.py", label="← Back to the Classroom", use_container_width=True)
+    if st.button("← Back to the Classroom", key="back_no_session", use_container_width=True):
+        st.switch_page("home.py")
     st.stop()
 
 # ── Verify with Stripe (once per session) ────────────────────────────────────
@@ -289,7 +285,8 @@ if not meta:
       <p class="confirm-sub">Your payment went through. Head back to the classroom to get started.</p>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("app.py", label="Go to the Classroom →", use_container_width=True)
+    if st.button("Go to the Classroom →", key="back_unknown_tool", use_container_width=True):
+        st.switch_page("home.py")
     st.stop()
 
 # ── SUCCESS ───────────────────────────────────────────────────────────────────
@@ -388,16 +385,21 @@ st.markdown(f"""
 if tool == "lifetime":
     c1, c2 = st.columns(2)
     with c1:
-        st.page_link("pages/1_Blurb_Auditor.py",    label="📖 Blurb Auditor →",    use_container_width=True)
+        if st.button("📖 Blurb Auditor →", key="lt_blurb", use_container_width=True):
+            st.switch_page("1_Blurb_Auditor.py")
     with c2:
-        st.page_link("pages/2_FB_Ad_Package.py",     label="📱 Ad Package →",       use_container_width=True)
+        if st.button("📱 Ad Package →", key="lt_ad", use_container_width=True):
+            st.switch_page("2_FB_Ad_Package.py")
     c3, c4 = st.columns(2)
     with c3:
-        st.page_link("pages/3_Cover_Assessment.py",  label="🎨 Cover Assessment →", use_container_width=True)
+        if st.button("🎨 Cover Assessment →", key="lt_cover", use_container_width=True):
+            st.switch_page("3_Cover_Assessment.py")
     with c4:
-        st.page_link("pages/4_Amazon_Assessment.py", label="🛒 Amazon Assessment →",use_container_width=True)
+        if st.button("🛒 Amazon Assessment →", key="lt_amazon", use_container_width=True):
+            st.switch_page("4_Amazon_Assessment.py")
 else:
-    st.page_link(meta["page"], label=meta["cta"], use_container_width=True)
+    if st.button(meta["cta"], key="go_to_tool", use_container_width=True):
+        st.switch_page(meta["page"])
 
 # Footer
 st.markdown("""

@@ -19,12 +19,7 @@ try:
 except ImportError:
     DOCX_AVAILABLE = False
 
-st.set_page_config(
-    page_title="FB Ad Package | The Writing Wives",
-    page_icon="📱",
-    layout="centered",
-    initial_sidebar_state="collapsed",
-)
+
 
 PRIMARY    = "#1A1A1A"
 PRIMARY_MID= "#2E2E2E"
@@ -41,7 +36,7 @@ NAVY_BG    = "#EEF4FB"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def get_logo_b64():
-    p = Path(__file__).parent.parent / "logo.png"
+    p = Path(__file__).parent / "logo.png"
     if p.exists():
         with open(p, "rb") as f:
             return base64.b64encode(f.read()).decode()
@@ -629,7 +624,8 @@ if not is_authenticated():
             st.warning("Payment couldn't be verified yet — try refreshing in a moment.")
 
 # ── Header ────────────────────────────────────────────────────────────────────
-st.page_link("app.py", label="← Back to All Tools")
+if st.button("← Back to All Tools", key="back_home"):
+    st.switch_page("home.py")
 
 _logo_b64 = get_logo_b64()
 _logo_html = f'<div class="logo-wrap"><img src="data:image/png;base64,{_logo_b64}" alt="The Writing Wives"></div>' if _logo_b64 else ""

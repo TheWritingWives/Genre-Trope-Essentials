@@ -21,12 +21,7 @@ except ImportError:
     DOCX_AVAILABLE = False
 
 # ── Page config ───────────────────────────────────────────────────────────────
-st.set_page_config(
-    page_title="Blurb Auditor | The Writing Wives",
-    page_icon="📖",
-    layout="centered",
-    initial_sidebar_state="collapsed",
-)
+
 
 # ── Colours — Writing Wives brand (black + gold) ──────────────────────────────
 PRIMARY      = "#1A1A1A"   # near-black
@@ -1011,7 +1006,8 @@ def generate_ad_docx(ad_data, book_title):
 # ═════════════════════════════════════════════════════════════════════════════
 
 # Back to home
-st.page_link("app.py", label="← Back to All Tools")
+if st.button("← Back to All Tools", key="back_home"):
+    st.switch_page("home.py")
 
 # Header
 _logo_b64 = get_logo_b64()
