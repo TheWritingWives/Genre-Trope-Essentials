@@ -369,7 +369,7 @@ def show_upgrade_card():
     st.markdown('<div class="divider-or">or</div>', unsafe_allow_html=True)
     st.markdown('<div class="coupon-section"><div class="label">🎓 Writing Wives Skool Member? Enter your coupon for free access.</div></div>', unsafe_allow_html=True)
     with st.form("cover_coupon_form"):
-        code  = st.text_input("Coupon code", placeholder="e.g. WRITINGWIVES", label_visibility="collapsed")
+        code  = st.text_input("Coupon code", placeholder="", label_visibility="collapsed")
         apply = st.form_submit_button("Apply Coupon →")
     if apply:
         if code and check_coupon(code):
@@ -418,12 +418,12 @@ if is_authenticated():
 
 # ── Form ──────────────────────────────────────────────────────────────────────
 with st.form("cover_form"):
-    book_title = st.text_input("Book Title", placeholder="e.g. TIME TRAP")
+    book_title = st.text_input("Book Title", placeholder="")
     col1, col2 = st.columns(2)
     with col1:
-        genre = st.text_input("Genre / Sub-Genre", placeholder="e.g. YA Time Travel Thriller")
+        genre = st.text_input("Genre / Sub-Genre", placeholder="")
     with col2:
-        series = st.text_input("Series Name (optional)", placeholder="e.g. The Time Trap Series, Book 1")
+        series = st.text_input("Series Name (optional)", placeholder="")
     cover_file = st.file_uploader(
         "Upload Your Cover",
         type=["jpg", "jpeg", "png", "webp"],

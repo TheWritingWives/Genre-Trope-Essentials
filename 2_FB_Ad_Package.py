@@ -601,7 +601,7 @@ def show_upgrade_card():
     st.markdown('<div class="divider-or">or</div>', unsafe_allow_html=True)
     st.markdown('<div class="coupon-section"><div class="label">🎓 Writing Wives Skool Member? Enter your coupon for free access.</div></div>', unsafe_allow_html=True)
     with st.form("ad_coupon_form"):
-        code  = st.text_input("Coupon code", placeholder="e.g. WRITINGWIVES", label_visibility="collapsed")
+        code  = st.text_input("Coupon code", placeholder="", label_visibility="collapsed")
         apply = st.form_submit_button("Apply Coupon →")
     if apply:
         if code and check_coupon(code):

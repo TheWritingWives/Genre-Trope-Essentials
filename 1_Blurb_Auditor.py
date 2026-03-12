@@ -718,7 +718,7 @@ def show_upgrade_card():
     """, unsafe_allow_html=True)
 
     with st.form("coupon_form"):
-        code  = st.text_input("Coupon code", placeholder="e.g. WRITINGWIVES", label_visibility="collapsed")
+        code  = st.text_input("Coupon code", placeholder="", label_visibility="collapsed")
         apply = st.form_submit_button("Apply Coupon →")
 
     if apply:
@@ -858,7 +858,7 @@ def show_ad_upgrade_card():
     """, unsafe_allow_html=True)
 
     with st.form("ad_coupon_form"):
-        code  = st.text_input("Coupon code", placeholder="e.g. WRITINGWIVES", label_visibility="collapsed", key="ad_coupon_input")
+        code  = st.text_input("Coupon code", placeholder="", label_visibility="collapsed", key="ad_coupon_input")
         apply = st.form_submit_button("Apply Coupon →")
 
     if apply:
@@ -1062,10 +1062,10 @@ if is_authenticated():
 
 # ── Audit form ────────────────────────────────────────────────────────────────
 with st.form("audit_form"):
-    book_title = st.text_input("Book Title", placeholder="e.g. TIME TRAP")
+    book_title = st.text_input("Book Title", placeholder="")
     col1, col2 = st.columns(2)
     with col1:
-        genre = st.text_input("Genre", placeholder="e.g. YA Time Travel Thriller")
+        genre = st.text_input("Genre", placeholder="")
     with col2:
         tense = st.selectbox(
             "POV / Tense",
