@@ -264,7 +264,8 @@ for i, tool in enumerate(TOOLS):
           <div class="tc-price-sub">{tool['price_sub']}</div>
         </div>
         """, unsafe_allow_html=True)
-        st.page_link(tool["page"], label=tool["cta"], use_container_width=True)
+        if st.button(tool["cta"], use_container_width=True, key=f"tool_btn_{i}"):
+            st.switch_page(tool["page"])
 
 # ── How it works ──────────────────────────────────────────────────────────────
 st.markdown('<div class="section-title">How It Works</div>', unsafe_allow_html=True)
