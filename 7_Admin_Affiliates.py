@@ -155,18 +155,21 @@ if not st.session_state.get("admin_auth"):
     st.stop()
 
 # ── Authenticated ──────────────────────────────────────────────────────────────
+
+# Load all data first so we can use counts in the header
+all_affiliates   = get_all_affiliates()
+all_sales        = get_all_sales()
+pending_apps     = get_pending_applications()
+
 st.markdown(f"""
 <div class="admin-header">
   <h1>🔐 Affiliate Admin</h1>
   <p class="sub">The Writing Wives — manage affiliates, view sales, and record payouts.</p>
-  {f'<p style="color:#D4B36E;font-size:0.85rem;margin:0.3rem 0 0;">⚠️ {len(pending_apps)} pending application(s) waiting for review</p>' if pending_apps else ''}
 </div>
 """, unsafe_allow_html=True)
 
-# Load all data
-all_affiliates   = get_all_affiliates()
-all_sales        = get_all_sales()
-pending_apps     = get_pending_applications()
+if pending_apps:
+    st.warning(f"⚠️ {len(pending_apps)} pending application(s) waiting for review — see the Applications tab.")
 
 # ── Summary stats ──────────────────────────────────────────────────────────────
 total_commission = sum(s.get("commission_amount", 0) for s in all_sales)
