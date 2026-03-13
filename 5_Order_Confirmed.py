@@ -2,6 +2,7 @@ import streamlit as st
 import base64
 from pathlib import Path
 
+
 try:
     import stripe as stripe_lib
     STRIPE_AVAILABLE = True
@@ -35,17 +36,19 @@ def get_logo_b64():
     return None
 
 def verify_stripe_session(session_id):
+    """Returns (verified, customer_email, affiliate_code)."""
     if not STRIPE_AVAILABLE:
-        return False, None
+        return False, None, None
     try:
         stripe_lib.api_key = get_secret("STRIPE_SECRET_KEY")
         session = stripe_lib.checkout.Session.retrieve(session_id)
         if session.payment_status == "paid":
-            email = session.customer_details.email if session.customer_details else None
-            return True, email
+            email    = session.customer_details.email if session.customer_details else None
+            aff_code = getattr(session, "client_reference_id", None) or ""
+            return True, email, aff_code
     except Exception:
         pass
-    return False, None
+    return False, None, None
 
 def grant_access_for_tool(tool: str, email=None):
     """Set session_state access flags for the purchased tool."""
@@ -239,11 +242,23 @@ check_key = f"confirmed_{tool}_{session_id[:12]}"
 if not st.session_state.get(check_key):
     st.session_state[check_key] = True
     with st.spinner("Verifying your payment — just a moment..."):
-        ok, email = verify_stripe_session(session_id)
+        ok, email, aff_code = verify_stripe_session(session_id)
     if ok:
         grant_access_for_tool(tool, email=email)
         st.session_state["payment_verified"] = True
         st.session_state["payment_email"]    = email or ""
+        # ── Log affiliate sale if this purchase came through a referral link ──
+        if aff_code:
+            try:
+                from affiliate_utils import log_sale
+                log_sale(
+                    affiliate_code    = aff_code,
+                    stripe_session_id = session_id,
+                    product           = tool,
+                    customer_email    = email or "",
+                )
+            except Exception:
+                pass  # Never block the confirmation page on a logging error
     else:
         st.session_state["payment_verified"] = False
         st.session_state["payment_email"]    = ""

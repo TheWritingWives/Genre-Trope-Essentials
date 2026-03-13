@@ -3,6 +3,9 @@ from openai import OpenAI
 import json, re, io, base64
 from pathlib import Path
 
+from affiliate_utils import capture_ref, affiliate_payment_link
+capture_ref()
+
 try:
     import stripe as stripe_lib
     STRIPE_AVAILABLE = True
@@ -346,7 +349,7 @@ def generate_cover_docx(data, book_title):
 def show_upgrade_card():
     price = get_secret("COVER_PRICE_DISPLAY", "$19")
     sub   = get_secret("COVER_PRICE_SUBTITLE", "one-time · per cover")
-    link  = get_secret("STRIPE_COVER_LINK", "")
+    link  = affiliate_payment_link(get_secret("STRIPE_COVER_LINK", ""))
     st.markdown(f"""
     <div class="upgrade-card">
       <div class="uc-eyebrow">Unlock Your Full Assessment</div>

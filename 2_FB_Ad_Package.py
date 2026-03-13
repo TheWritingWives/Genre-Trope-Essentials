@@ -3,6 +3,9 @@ from openai import OpenAI
 import json, re, io, base64, subprocess, tempfile, os
 from pathlib import Path
 
+from affiliate_utils import capture_ref, affiliate_payment_link
+capture_ref()
+
 try:
     import stripe as stripe_lib
     STRIPE_AVAILABLE = True
@@ -576,7 +579,7 @@ def generate_ad_docx(data, book_title):
 def show_upgrade_card():
     price = get_secret("AD_PRICE_DISPLAY", "$25")
     sub   = get_secret("AD_PRICE_SUBTITLE", "per report · ad copy for your blurb")
-    link  = get_secret("STRIPE_AD_LINK", "")
+    link  = affiliate_payment_link(get_secret("STRIPE_AD_LINK", ""))
     st.markdown(f"""
     <div class="upgrade-card">
       <div class="uc-eyebrow">Unlock Your Ad Package</div>
@@ -650,7 +653,7 @@ if is_authenticated():
 
 # ── Form ──────────────────────────────────────────────────────────────────────
 with st.form("ad_form"):
-    book_title = st.text_input("Book Title", placeholder="e.g. We Are Legion (We Are Bob)")
+    book_title = st.text_input("Book Title", placeholder="Insert your title here")
 
     col1, col2 = st.columns(2)
     with col1:

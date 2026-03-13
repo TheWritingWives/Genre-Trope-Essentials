@@ -6,6 +6,9 @@ import io
 import base64
 from pathlib import Path
 
+from affiliate_utils import capture_ref, affiliate_payment_link
+capture_ref()
+
 try:
     import stripe as stripe_lib
     STRIPE_AVAILABLE = True
@@ -682,7 +685,7 @@ def show_upgrade_card():
     """Inline upgrade CTA with coupon — shown after the teaser."""
     price_display  = st.secrets.get("PRICE_DISPLAY", "$9")
     price_subtitle = st.secrets.get("PRICE_SUBTITLE", "one-time · unlimited audits")
-    payment_link   = st.secrets.get("STRIPE_PAYMENT_LINK", "")
+    payment_link   = affiliate_payment_link(st.secrets.get("STRIPE_PAYMENT_LINK", ""))
 
     st.markdown(f"""
     <div class="upgrade-card">
@@ -822,7 +825,7 @@ def show_ad_upgrade_card():
     """Upsell card shown at the bottom of the full blurb audit report."""
     ad_price   = st.secrets.get("AD_PRICE_DISPLAY", "$25")
     ad_sub     = st.secrets.get("AD_PRICE_SUBTITLE", "one-time · ad copy for this blurb")
-    ad_link    = st.secrets.get("STRIPE_AD_LINK", "")
+    ad_link    = affiliate_payment_link(st.secrets.get("STRIPE_AD_LINK", ""))
 
     st.markdown(f"""
     <div class="ad-upgrade-card">
