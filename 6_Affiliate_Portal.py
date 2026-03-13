@@ -155,20 +155,23 @@ if not st.session_state["aff_logged_in"]:
     </div>
     """, unsafe_allow_html=True)
 
-    with st.form("aff_login_form"):
-        entered_code = st.text_input(
-            "Your affiliate code",
-            placeholder="e.g. JANES_CODE",
-            label_visibility="visible",
-        )
-        submitted = st.form_submit_button("View My Earnings →", use_container_width=True)
+    # Use a session_state key so the value survives the rerun on error
+    if "aff_code_input" not in st.session_state:
+        st.session_state["aff_code_input"] = ""
 
-    if submitted:
-        if not entered_code.strip():
+    entered_code = st.text_input(
+        "Your affiliate code",
+        placeholder="e.g. JANES_CODE",
+        key="aff_code_input",
+    )
+    login_btn = st.button("View My Earnings →", use_container_width=True)
+
+    if login_btn:
+        if not st.session_state["aff_code_input"].strip():
             st.error("Please enter your affiliate code.")
         else:
             with st.spinner("Checking your code..."):
-                aff = get_affiliate(entered_code.strip())
+                aff = get_affiliate(st.session_state["aff_code_input"].strip())
             if aff:
                 st.session_state["aff_logged_in"]   = True
                 st.session_state["aff_code_active"] = aff["code"]
