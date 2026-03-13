@@ -172,7 +172,7 @@ Categories to assess:
 overall_score: 0–100. 80+ is market-ready. 60–79 is functional but needs work. Below 60 needs significant redesign.
 If the visual genre signal doesn't match the author's stated genre, flag this as a critical issue."""
 
-def call_cover_assessment(image_b64, genre, book_title, series=""):
+def call_cover_assessment(image_b64, genre, book_title, series="", mime_type="image/jpeg"):
     api_key = get_secret("OPENROUTER_API_KEY")
     if not api_key:
         st.error("API key not configured.")
@@ -189,7 +189,7 @@ def call_cover_assessment(image_b64, genre, book_title, series=""):
             {"role": "system", "content": COVER_SYSTEM_PROMPT},
             {"role": "user", "content": [
                 {"type": "text", "text": user_text},
-                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_b64}"}},
+                {"type": "image_url", "image_url": {"url": f"data:{mime_type};base64,{image_b64}"}},
             ]},
         ],
         temperature=0.4,
@@ -443,10 +443,11 @@ if submitted:
         st.image(cover_file, caption=f"{book_title or 'Your Cover'}", width=280)
         image_bytes = cover_file.read()
         image_b64   = base64.b64encode(image_bytes).decode()
+        image_mime  = cover_file.type or "image/jpeg"
 
         with st.spinner("Analysing your cover..."):
             try:
-                result = call_cover_assessment(image_b64, genre, book_title, series)
+                result = call_cover_assessment(image_b64, genre, book_title, series, mime_type=image_mime)
                 st.session_state["last_cover"] = {"result": result, "book_title": book_title}
             except json.JSONDecodeError:
                 st.error("The AI returned an unexpected format. Please try again.")
