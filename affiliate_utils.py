@@ -230,30 +230,25 @@ def create_affiliate(
         return False, str(e)
 
 
-# ── Email helper ────────────────────────────────────────────────────────────────
+# ── Email helper (uses Resend API) ─────────────────────────────────────────────
 def send_affiliate_welcome_email(name: str, email: str, code: str) -> tuple[bool, str]:
     """
-    Send a welcome email to a newly approved affiliate.
-    Requires SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD in st.secrets.
+    Send a welcome email to a newly approved affiliate via Resend.
+    Requires RESEND_API_KEY and RESEND_FROM in st.secrets.
     Returns (True, "") on success or (False, error_message) on failure.
     """
-    import smtplib
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.text import MIMEText
-
     try:
-        host     = st.secrets.get("SMTP_HOST", "")
-        port     = int(st.secrets.get("SMTP_PORT", 587))
-        user     = st.secrets.get("SMTP_USER", "")
-        password = st.secrets.get("SMTP_PASSWORD", "")
-        from_str = st.secrets.get("SMTP_FROM", f"The Writing Wives <{user}>")
+        import urllib.request, json as _json
 
-        if not all([host, user, password]):
-            return False, "SMTP not configured in secrets."
+        api_key  = st.secrets.get("RESEND_API_KEY", "")
+        from_str = st.secrets.get("RESEND_FROM", "The Writing Wives <onboarding@resend.dev>")
 
-        base_url     = st.secrets.get("APP_BASE_URL", "https://genre-trope-essentials.streamlit.app")
-        aff_link     = f"{base_url}/?ref={code}"
-        portal_url   = f"{base_url}/Affiliate_Portal"
+        if not api_key:
+            return False, "RESEND_API_KEY not configured in secrets."
+
+        base_url   = st.secrets.get("APP_BASE_URL", "https://genre-trope-essentials.streamlit.app")
+        aff_link   = f"{base_url}/?ref={code}"
+        portal_url = f"{base_url}/Affiliate_Portal"
 
         html = f"""
         <html><body style="font-family:Arial,sans-serif;color:#1A1A1A;max-width:600px;margin:0 auto;">
@@ -305,18 +300,25 @@ def send_affiliate_welcome_email(name: str, email: str, code: str) -> tuple[bool
             f"Happy promoting!\n— The Writing Wives Team"
         )
 
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = "You're approved as a Writing Wives affiliate! 🎉"
-        msg["From"]    = from_str
-        msg["To"]      = email
-        msg.attach(MIMEText(plain, "plain"))
-        msg.attach(MIMEText(html, "html"))
+        payload = _json.dumps({
+            "from":    from_str,
+            "to":      [email],
+            "subject": "You're approved as a Writing Wives affiliate! 🎉",
+            "html":    html,
+            "text":    plain,
+        }).encode("utf-8")
 
-        with smtplib.SMTP(host, port) as server:
-            server.ehlo()
-            server.starttls()
-            server.login(user, password)
-            server.sendmail(user, email, msg.as_string())
+        req = urllib.request.Request(
+            "https://api.resend.com/emails",
+            data    = payload,
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type":  "application/json",
+            },
+            method = "POST",
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            resp.read()  # consume response
 
         return True, ""
 

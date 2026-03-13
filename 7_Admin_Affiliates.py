@@ -94,26 +94,26 @@ st.markdown(f"""
   }}
   .stButton > button:hover {{ background:{GOLD} !important; color:{PRIMARY} !important; }}
 
-  .badge-pending {
+  .badge-pending {{
     background:#FFF3CD; color:#856404;
     font-size:0.75rem; font-weight:700;
     padding:2px 10px; border-radius:20px;
-  }
-  .badge-approved {
+  }}
+  .badge-approved {{
     background:#D4EDDA; color:#1A7A4A;
     font-size:0.75rem; font-weight:700;
     padding:2px 10px; border-radius:20px;
-  }
-  .badge-rejected {
+  }}
+  .badge-rejected {{
     background:#FFF0F0; color:#CC3333;
     font-size:0.75rem; font-weight:700;
     padding:2px 10px; border-radius:20px;
-  }
-  .app-card {
+  }}
+  .app-card {{
     background:#fff; border:1px solid #e8d9b0;
     border-radius:10px; padding:1.2rem 1.4rem; margin-bottom:1rem;
     border-left:4px solid #D4B36E;
-  }
+  }}
   .info-box {{
     background:#EEF4FF; border:1px solid #c5d8f8;
     border-left:4px solid #3B6FD4; border-radius:0 8px 8px 0;
