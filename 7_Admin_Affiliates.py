@@ -20,6 +20,10 @@ from affiliate_utils import (
     get_all_sales,
     create_affiliate,
     mark_paid,
+    get_pending_applications,
+    get_all_applications,
+    approve_application,
+    reject_application,
     PRODUCT_NAMES,
     DEFAULT_COMMISSION_RATE,
 )
@@ -37,8 +41,11 @@ PRIMARY    = "#1A1A1A"
 GOLD       = "#D4B36E"
 GOLD_DARK  = "#A8863A"
 GOLD_LIGHT = "#FAF4E6"
+GOLD_MID   = "#F5EDD6"
 GREEN      = "#1A7A4A"
 GREEN_BG   = "#D4EDDA"
+RED        = "#CC3333"
+RED_BG     = "#FFF0F0"
 
 # ── CSS ────────────────────────────────────────────────────────────────────────
 st.markdown(f"""
@@ -87,6 +94,26 @@ st.markdown(f"""
   }}
   .stButton > button:hover {{ background:{GOLD} !important; color:{PRIMARY} !important; }}
 
+  .badge-pending {
+    background:#FFF3CD; color:#856404;
+    font-size:0.75rem; font-weight:700;
+    padding:2px 10px; border-radius:20px;
+  }
+  .badge-approved {
+    background:#D4EDDA; color:#1A7A4A;
+    font-size:0.75rem; font-weight:700;
+    padding:2px 10px; border-radius:20px;
+  }
+  .badge-rejected {
+    background:#FFF0F0; color:#CC3333;
+    font-size:0.75rem; font-weight:700;
+    padding:2px 10px; border-radius:20px;
+  }
+  .app-card {
+    background:#fff; border:1px solid #e8d9b0;
+    border-radius:10px; padding:1.2rem 1.4rem; margin-bottom:1rem;
+    border-left:4px solid #D4B36E;
+  }
   .info-box {{
     background:#EEF4FF; border:1px solid #c5d8f8;
     border-left:4px solid #3B6FD4; border-radius:0 8px 8px 0;
@@ -132,12 +159,14 @@ st.markdown(f"""
 <div class="admin-header">
   <h1>🔐 Affiliate Admin</h1>
   <p class="sub">The Writing Wives — manage affiliates, view sales, and record payouts.</p>
+  {f'<p style="color:#D4B36E;font-size:0.85rem;margin:0.3rem 0 0;">⚠️ {len(pending_apps)} pending application(s) waiting for review</p>' if pending_apps else ''}
 </div>
 """, unsafe_allow_html=True)
 
 # Load all data
-all_affiliates = get_all_affiliates()
-all_sales      = get_all_sales()
+all_affiliates   = get_all_affiliates()
+all_sales        = get_all_sales()
+pending_apps     = get_pending_applications()
 
 # ── Summary stats ──────────────────────────────────────────────────────────────
 total_commission = sum(s.get("commission_amount", 0) for s in all_sales)
@@ -176,7 +205,121 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── Tabs ───────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3 = st.tabs(["💰 Unpaid Commissions", "📋 All Sales", "➕ Manage Affiliates"])
+tab0, tab1, tab2, tab3 = st.tabs(["📬 Applications", "💰 Unpaid Commissions", "📋 All Sales", "➕ Manage Affiliates"])
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TAB 0 — Affiliate Applications
+# ─────────────────────────────────────────────────────────────────────────────
+with tab0:
+    all_apps = get_all_applications()
+    pending  = [a for a in all_apps if a.get("status") == "pending"]
+    reviewed = [a for a in all_apps if a.get("status") != "pending"]
+
+    if not all_apps:
+        st.info("No applications yet. Share the signup link: "
+                f"`{st.secrets.get('APP_BASE_URL','https://YOUR-APP.streamlit.app')}/Affiliate_Signup`")
+    else:
+        # Pending applications
+        if pending:
+            st.markdown(f"### 📬 Pending Applications ({len(pending)})")
+            st.markdown(
+                '<div class="info-box">Review each application below. '
+                'Approved applicants are automatically created as affiliates and emailed their link.</div>',
+                unsafe_allow_html=True,
+            )
+            for app in pending:
+                app_id    = app["id"]
+                app_name  = app.get("name", "—")
+                app_code  = app.get("requested_code", "")
+                app_email = app.get("paypal_email", "")
+                app_plan  = app.get("marketing_plan", "")
+                raw_date  = app.get("applied_at", "")
+                try:
+                    display_date = _dt.fromisoformat(
+                        raw_date.replace("Z", "+00:00")
+                    ).strftime("%b %d, %Y at %I:%M %p")
+                except Exception:
+                    display_date = raw_date[:10] if raw_date else "—"
+
+                st.markdown(f"""
+                <div class="app-card">
+                  <strong style="font-size:1.05rem;">{app_name}</strong>
+                  &nbsp;<span class="badge-pending">Pending</span>
+                  <div style="font-size:0.85rem;color:#666;margin-top:0.3rem;">
+                    Applied: {display_date}
+                  </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                col_a, col_b = st.columns(2)
+                with col_a:
+                    st.markdown(f"**PayPal email:** {app_email}")
+                    st.markdown(f"**Requested code:** `{app_code}`")
+                with col_b:
+                    st.markdown(f"**Marketing plan:**")
+                    st.markdown(f"> {app_plan[:300]}{'...' if len(app_plan) > 300 else ''}")
+
+                with st.expander(f"✅ Approve {app_name}"):
+                    with st.form(f"approve_form_{app_id}"):
+                        st.markdown("Confirm the details before approving. The affiliate will be created and emailed automatically.")
+                        conf_code = st.text_input(
+                            "Affiliate code (confirm or change)",
+                            value=app_code,
+                            key=f"code_{app_id}",
+                        )
+                        conf_rate = st.number_input(
+                            "Commission rate (%)",
+                            min_value=1, max_value=50,
+                            value=int(DEFAULT_COMMISSION_RATE * 100),
+                            step=1, key=f"rate_{app_id}",
+                        )
+                        conf_notes = st.text_input(
+                            "Internal notes (optional)",
+                            placeholder="e.g. Big newsletter — 10k subscribers",
+                            key=f"notes_{app_id}",
+                        )
+                        approve_btn = st.form_submit_button(
+                            "✅ Approve & Send Email", use_container_width=True
+                        )
+                    if approve_btn:
+                        ok, err = approve_application(
+                            app_id=app_id,
+                            code=conf_code.strip().upper(),
+                            name=app_name,
+                            email=app_email,
+                            notes=conf_notes.strip(),
+                            commission_rate=conf_rate / 100,
+                        )
+                        if ok:
+                            st.success(f"✅ {app_name} approved and emailed their affiliate link!")
+                            st.rerun()
+                        else:
+                            st.error(f"Error approving: {err}")
+
+                col_rej, _ = st.columns([1, 3])
+                with col_rej:
+                    if st.button(f"❌ Reject", key=f"reject_{app_id}"):
+                        reject_application(app_id)
+                        st.warning(f"Application from {app_name} rejected.")
+                        st.rerun()
+
+                st.divider()
+
+        else:
+            st.success("🎉 No pending applications right now!")
+
+        # Previously reviewed
+        if reviewed:
+            with st.expander(f"View {len(reviewed)} reviewed application(s)"):
+                for app in reviewed:
+                    status    = app.get("status", "")
+                    badge_cls = "badge-approved" if status == "approved" else "badge-rejected"
+                    st.markdown(
+                        f"**{app.get('name','—')}** &nbsp;"
+                        f"<span class='{badge_cls}'>{status.title()}</span> &nbsp; "
+                        f"`{app.get('requested_code','')}` &nbsp; {app.get('paypal_email','')}",
+                        unsafe_allow_html=True,
+                    )
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 1 — Unpaid commissions (grouped by affiliate)

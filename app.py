@@ -21,6 +21,7 @@ pg = st.navigation(
         st.Page("5_Order_Confirmed.py",  title="Order Confirmed",           icon="✅",  url_path="Order_Confirmed"),
         st.Page("6_Affiliate_Portal.py", title="Affiliate Portal",          icon="🤝",  url_path="Affiliate_Portal"),
         st.Page("7_Admin_Affiliates.py", title="Admin — Affiliates",        icon="🔐",  url_path="Admin_Affiliates"),
+        st.Page("8_Affiliate_Signup.py",  title="Become an Affiliate",        icon="✋",  url_path="Affiliate_Signup"),
     ],
     position="hidden",
 )

@@ -51,3 +51,22 @@ CREATE TABLE IF NOT EXISTS affiliate_sales (
 4. Also add `ADMIN_PASSWORD` and `APP_BASE_URL` to your secrets
 
 That's it — the affiliate system is ready to use.
+
+---
+
+## Table 3 — affiliate_applications
+
+Run this SQL in your Supabase SQL Editor to add the affiliate signup form table:
+
+```sql
+CREATE TABLE IF NOT EXISTS affiliate_applications (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name           TEXT NOT NULL,
+  requested_code TEXT NOT NULL,
+  paypal_email   TEXT NOT NULL,
+  marketing_plan TEXT NOT NULL,
+  status         TEXT DEFAULT 'pending',  -- pending | approved | rejected
+  applied_at     TIMESTAMPTZ DEFAULT now(),
+  reviewed_at    TIMESTAMPTZ
+);
+```
