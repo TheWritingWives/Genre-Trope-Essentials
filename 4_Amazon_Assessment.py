@@ -576,17 +576,6 @@ def show_upgrade_card():
     """, unsafe_allow_html=True)
     if link:
         st.link_button(f"Unlock Full Assessment — {price} →", link, use_container_width=True)
-    st.markdown('<div class="divider-or">or</div>', unsafe_allow_html=True)
-    st.markdown('<div class="coupon-section"><div class="label">🎓 Writing Wives Skool Member? Enter your coupon for free access.</div></div>', unsafe_allow_html=True)
-    with st.form("amazon_coupon_form"):
-        code  = st.text_input("Coupon code", placeholder="", label_visibility="collapsed")
-        apply = st.form_submit_button("Apply Coupon →")
-    if apply:
-        if code and check_coupon(code):
-            grant_access(reason="coupon")
-            st.rerun()
-        else:
-            st.error("That coupon code isn't valid.")
 
 # ── URL verification ──────────────────────────────────────────────────────────
 if not is_authenticated():
@@ -625,6 +614,25 @@ if is_authenticated():
         st.markdown('<div class="bookmark-tip">🔖 <strong>Bookmark this page</strong> — your URL contains your access token.</div>', unsafe_allow_html=True)
     elif reason in ("coupon", "lifetime"):
         st.markdown('<div class="success-banner">🎓 <strong>Access granted.</strong> Run as many assessments as you need.</div>', unsafe_allow_html=True)
+
+# ── Coupon entry (always rendered so error persists on rerun) ─────────────────
+if not is_authenticated():
+    st.markdown('<div class="coupon-section"><div class="label">🎓 Writing Wives Skool Member? Enter your coupon for free access.</div></div>', unsafe_allow_html=True)
+    if "amazon_coupon_val" not in st.session_state:
+        st.session_state["amazon_coupon_val"] = ""
+    coupon_col, btn_col = st.columns([3, 1])
+    with coupon_col:
+        st.text_input("Coupon code", placeholder="e.g. WRITINGWIVES",
+                      label_visibility="collapsed", key="amazon_coupon_val")
+    with btn_col:
+        apply_coupon = st.button("Apply →", key="amazon_coupon_btn", use_container_width=True)
+    if apply_coupon:
+        entered = st.session_state.get("amazon_coupon_val", "").strip()
+        if entered and check_coupon(entered):
+            grant_access(reason="coupon")
+            st.rerun()
+        else:
+            st.error("That coupon code wasn't found. Double-check the spelling and try again.")
 
 # ── Main form ─────────────────────────────────────────────────────────────────
 with st.form("amazon_url_form"):
