@@ -720,12 +720,17 @@ def show_upgrade_card():
     </div>
     """, unsafe_allow_html=True)
 
-    with st.form("coupon_form"):
-        code  = st.text_input("Coupon code", placeholder="", label_visibility="collapsed")
-        apply = st.form_submit_button("Apply Coupon →")
-
-    if apply:
-        if code and check_coupon(code):
+    if "blurb_coupon_val" not in st.session_state:
+        st.session_state["blurb_coupon_val"] = ""
+    coupon_col, btn_col = st.columns([3, 1])
+    with coupon_col:
+        st.text_input("Coupon code", placeholder="", label_visibility="collapsed",
+                      key="blurb_coupon_val")
+    with btn_col:
+        apply_coupon = st.button("Apply →", key="blurb_coupon_btn", use_container_width=True)
+    if apply_coupon:
+        entered = st.session_state.get("blurb_coupon_val", "").strip()
+        if entered and check_coupon(entered):
             grant_access(reason="coupon")
             st.rerun()
         else:
@@ -860,12 +865,17 @@ def show_ad_upgrade_card():
     </div>
     """, unsafe_allow_html=True)
 
-    with st.form("ad_coupon_form"):
-        code  = st.text_input("Coupon code", placeholder="", label_visibility="collapsed", key="ad_coupon_input")
-        apply = st.form_submit_button("Apply Coupon →")
-
-    if apply:
-        if code and check_ad_coupon(code):
+    if "ad_coupon_val" not in st.session_state:
+        st.session_state["ad_coupon_val"] = ""
+    coupon_col2, btn_col2 = st.columns([3, 1])
+    with coupon_col2:
+        st.text_input("Coupon code", placeholder="", label_visibility="collapsed",
+                      key="ad_coupon_val")
+    with btn_col2:
+        apply_ad_coupon = st.button("Apply →", key="ad_coupon_btn", use_container_width=True)
+    if apply_ad_coupon:
+        entered = st.session_state.get("ad_coupon_val", "").strip()
+        if entered and check_ad_coupon(entered):
             grant_ad_access(reason="coupon")
             st.rerun()
         else:
