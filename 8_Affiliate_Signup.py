@@ -13,7 +13,7 @@ st.set_page_config(
     page_title="Become an Affiliate | The Writing Wives",
     page_icon="🤝",
     layout="centered",
-    initial_sidebar_ebar="collapsed",
+    initial_sidebar_state="collapsed",
 )
 
 # ── Brand colours ──────────────────────────────────────────────────────────────
